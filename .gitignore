@@ -1,0 +1,16 @@
+env/
+*.pyc
+*.xml
+*.iml
+*.pid
+.idea
+*.rdb
+logs/
+/.idea
+media/
+errors.log
+db.sqlite3
+*-schedule.db
+local_settings.py
+
+*.DS_Store
