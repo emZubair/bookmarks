@@ -34,6 +34,8 @@ ALLOWED_HOSTS = ['mysite.example.net', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'account',
+    'images',
+    'easy_thumbnails',
     'social_django',
     'django_extensions',
     'django.contrib.admin',
@@ -140,3 +142,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '627299893566-agji5o9jdc662tko1s2mn4nd852vak1p.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'kkgP5yR9d1IID6ke3ejL6J81'
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+
+# ./manage.py runserver_plus --cert-file cert.crt
