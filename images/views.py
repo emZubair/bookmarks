@@ -8,10 +8,9 @@ from images.models import Image
 from common.decorators import ajax_required
 from django.http import HttpResponse
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
-# Create your views here.
-
-
+from actions.utils import create_action
 import pdb
+
 
 @login_required
 def image_create(request):
@@ -22,6 +21,7 @@ def image_create(request):
             new_item = form.save(commit=False)
             new_item.user = request.user
             new_item.save()
+            create_action(request.user, 'Bookmarked an image', new_item)
 
             messages.success(request, 'Image added Successfully')
 
@@ -52,6 +52,7 @@ def image_like(request):
             image = Image.objects.get(id=image_id)
             if action == 'like':
                 image.users_like.add(request.user)
+                create_action(request.user, action, image)
             else:
                 image.users_like.remove(request.user)
             return JsonResponse({'status': 'Ok'})
@@ -64,7 +65,7 @@ def image_like(request):
 @login_required
 def image_list(request):
     images = Image.objects.all()
-    paginator = Paginator(images, 2)
+    paginator = Paginator(images, 8)
     page = request.GET.get('page')
     try:
         images = paginator.page(page)

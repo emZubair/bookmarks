@@ -55,8 +55,6 @@
                     $('a.like').text(previous_action == 'like' ? 'Unlike' : 'Like');
                     var previous_likes = parseInt($('span.count .total').text());
                     $('span.count .total').text(previous_action == 'like' ? ++previous_likes: --previous_likes )
-                } else {
-                    alert("Please Login First")
                 }
             }
         );

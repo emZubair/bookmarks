@@ -1,11 +1,18 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from account.forms import (LoginForm, UserRegistrationForm,
                            UserEditForm, ProfileEditForm)
-from account.models import Profile
+from account.models import Profile, Contact
+from django.views.decorators.http import require_POST
+from common.decorators import ajax_required, self_view_not_allowed
+from actions.utils import create_action
+from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
+from actions.models import Action
 
 
 # Create your views here.
@@ -36,7 +43,32 @@ def user_login(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'account/dashboard.html', {'section': 'dashboard'})
+    # Display all actions by Default
+    actions = Action.objects.exclude(user=request.user)
+    following_ids = request.user.following.values_list('id', flat=True)
+
+    # User is following others, retrieve their actions only
+    # if following_ids:
+    #     actions = actions.filter(user_id__in=following_ids)
+    # selected_related only works for one-to-one or foreign key relations
+    # actions = actions.select_related('user', 'user__profile')[:10]
+    # Therefore using prefetch_related which works for all kind of relations
+    actions = actions.select_related('user', 'user__profile').prefetch_related('target')
+    paginator = Paginator(actions, 2)
+    page = request.GET.get('page')
+    try:
+        actions = paginator.page(page)
+    except PageNotAnInteger:
+        #  If the page is not Integer, deliver the first page
+        actions = paginator.page(1)
+    except EmptyPage:
+        if request.is_ajax():
+            # if the request is AJAX and page is out of range
+            # return an empty page
+            return HttpResponse('')
+        actions = paginator.page(paginator.num_pages)
+    return render(request, 'account/dashboard.html', {'section': 'dashboard',
+                                                      'actions': actions})
 
 
 def register(request):
@@ -52,6 +84,7 @@ def register(request):
             new_user.save()
             # create Profile for User
             Profile.objects.create(user=new_user)
+            create_action(new_user, 'Has created an account')
             return render(request, 'account/register_done.html',
                           {'new_user': new_user})
     else:
@@ -79,3 +112,53 @@ def edit(request):
 
     return render(request, 'account/edit.html', {'user_form': user_form,
                                                  'profile_form': profile_form})
+
+
+@login_required
+def user_list(request):
+    """
+    list all users
+    """
+
+    users = User.objects.filter(is_active=True).exclude(id=request.user.id)
+    return render(request, 'account/user/list.html', {'users': users,
+                                                      'section': 'people'})
+
+
+@login_required
+def user_details(request, username):
+    """
+    details of given username's user
+    """
+
+    user = get_object_or_404(User, username=username, is_active=True)
+    return render(request, 'account/user/details.html', {'user': user,
+                                                         'section': 'people'})
+
+
+@login_required
+@ajax_required
+@require_POST
+def user_follow(request):
+    """
+    follow the user
+    """
+
+    user_id = request.POST.get('id')
+    action = request.POST.get('action')
+
+    if user_id and action:
+        try:
+            user = User.objects.get(id=user_id)
+            if action == 'follow':
+                Contact.objects.get_or_create(from_user=request.user,
+                                              to_user=user)
+                create_action(request.user, 'is following', user)
+            else:
+                Contact.objects.filter(from_user=request.user, to_user=user).delete()
+                create_action(request.user, 'unfollowed', user)
+            return JsonResponse({'status': 'Ok'})
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error'})
+
+    return JsonResponse({'status': 'error'})

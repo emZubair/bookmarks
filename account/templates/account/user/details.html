@@ -1,0 +1,55 @@
+{% extends "base.html"%}
+{% load thumbnail %}
+{% block title %} {{user.username}} {% endblock %}
+
+{% block content %}
+    <h1> {{user.username}} </h1>
+    <div class="profile-info">
+        <img src="{% thumbnail user.profile.profile_image 180x180 %}" class="user-detail">
+    </div>
+    {% with total_followers=user.followers.count %}
+        <span class="count">
+            <span class="total">{{total_followers}}</span>
+            follower{{total_followers|pluralize}}
+        </span>
+    {% endwith %}
+    <a href="#" data-id="{{user.id}}" data-action="{% if request.user in user.followers.all %}un{%endif%}follow" class="follow button">
+        {% if request.user not in user.followers.all %}
+            Follow
+        {% else %}
+            Unfollow
+        {% endif %}
+    </a>
+    <span class="posts">
+        {% with total_posts=user.images_created.count %}
+            <span class="total">{{total_posts}}</span>
+            post{{total_posts|pluralize}}
+        {%endwith%}
+    </span>
+    <div id="image-list" class="image-container">
+        {% include "images/image/list_ajax.html" with images=user.images_created.all %}
+    </div>
+{% endblock %}
+
+{% block domready %}
+    $('a.follow').click(function(e) {
+        e.preventDefault();
+        $.post('{% url "user_follow" %}', {
+            id: $(this).data('id'),
+            action: $(this).data('action')},
+        function(data) {
+            if(data['status'] == 'Ok') {
+                var previous_action = $('a.follow').data('action')
+                // Toggle data-action
+                $('a.follow').data('action', previous_action=='follow' ? 'unfollow': 'follow')
+                // Toggle link text
+                $('a.follow').text(previous_action=='follow' ? 'Unfollow': 'Follow')
+                // update Follower Count
+                var previous_followers = parseInt($('span.count .total').text());
+                console.log(`Followers count:${previous_followers}`)
+                $('span.count .total').text(previous_action=='follow' ? ++previous_followers : --previous_followers)
+            }
+        }
+        )
+    });
+{% endblock %}

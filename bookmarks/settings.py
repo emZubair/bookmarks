@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from os.path import join
 from pathlib import Path
+from django.urls import reverse_lazy
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,7 +35,8 @@ ALLOWED_HOSTS = ['mysite.example.net', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'account',
-    'images',
+    'images.apps.ImagesConfig',
+    'actions',
     'easy_thumbnails',
     'social_django',
     'django_extensions',
@@ -144,3 +146,5 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'kkgP5yR9d1IID6ke3ejL6J81'
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 # ./manage.py runserver_plus --cert-file cert.crt
+
+ABSOLUTE_URL_OVERRIDES = {'auth.user': lambda u: reverse_lazy('user_details', args=[u.username])}
