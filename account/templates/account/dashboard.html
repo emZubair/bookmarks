@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+    {% with total_images_created=request.user.images_created.count %}
+        <p>
+            Welcome to your Dashboard. You have bookmarked {{total_images_created }}
+            image{{ total_images_create|pluralize}}
+        </p>
+    {%endwith%}
+    <p>
+        Drag the following button to your bookmarks toolbar to bookmark images from other websites ->
+        <a href="javascript:{% include "bookmarklet_launcher.js" %}" class="button">Bookmark it</a>
+    </p>
+    <p>Welcome to your Dashboard. You can <a href="{% url 'edit'%}">Edit</a> your profile.
+        You can change <a href="{% url 'password_change'%}">Password</a> here.</p>
+
+    <h2>What's Happening</h2>
+    <div id="action-list">
+        {% for action in actions %}
+            {% include 'actions/action/detail.html'%}
+        {% empty %}
+            <p>Silence before the storm</p>
+        {% endfor %}
+    </div>
+{%endblock%}
+
+{% block domready %}
+    var page = 1;
+    var empty_page = false;
+    var block_request = false;
+
+    $(window).scroll(function() {
+        var margin = $(document).height() - $(window).height() - 300;
+        if($(window).scrollTop() >  margin && empty_page == false && block_request==false) {
+            block_request = true;
+            page += 1
+            $.get(`?page=${page}`, function(data) {
+                if(data=='') {`
+                    empty_page = true;
+                } else {
+                    block_request = false;
+                    $('#action-list').append(data)
+                }
+            });
+        }
+    });
+{% endblock %}
