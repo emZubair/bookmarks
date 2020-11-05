@@ -16,8 +16,6 @@ def create_action(user, verb, target=None):
         target_ct = ContentType.objects.get_for_model(target)
         similar_actions = Action.objects.filter(target_ct=target_ct, target_id=target_ct.id)
 
-    import pdb
-    pdb.set_trace()
     if not similar_actions:
         action = Action(user=user, verb=verb, target=target)
         action.save()

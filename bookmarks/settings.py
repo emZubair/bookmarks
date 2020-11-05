@@ -149,6 +149,4 @@ REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0
 
-# ./manage.py runserver_plus --cert-file cert.crt
-
 ABSOLUTE_URL_OVERRIDES = {'auth.user': lambda u: reverse_lazy('user_details', args=[u.username])}
