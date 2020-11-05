@@ -12,5 +12,6 @@ errors.log
 db.sqlite3
 *-schedule.db
 local_settings.py
-
+*.cert
+*.key
 *.DS_Store
