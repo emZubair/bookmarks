@@ -7,8 +7,6 @@ from images.models import Image
 def user_likes_changed(sender, instance, **kwargs):
     action = kwargs.pop('action', None)
     if action == 'pre_add':
-        import pdb
-        pdb.set_trace()
         instance.total_likes = instance.users_like.count()
         instance.save()
     return instance
