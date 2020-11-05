@@ -2,6 +2,8 @@ from django.contrib.contenttypes.models import ContentType
 from datetime import timedelta
 from django.utils import timezone
 from actions.models import Action
+from django.conf import settings
+from redis import Redis
 
 
 def create_action(user, verb, target=None):
@@ -21,3 +23,10 @@ def create_action(user, verb, target=None):
         action.save()
         return True
     return False
+
+
+def get_redis():
+    redis = Redis(host=settings.REDIS_HOST,
+                  port=settings.REDIS_PORT,
+                  db=settings.REDIS_DB)
+    return redis

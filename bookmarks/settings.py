@@ -145,6 +145,10 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '627299893566-agji5o9jdc662tko1s2mn4nd852vak1p.a
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'kkgP5yR9d1IID6ke3ejL6J81'
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+
 # ./manage.py runserver_plus --cert-file cert.crt
 
 ABSOLUTE_URL_OVERRIDES = {'auth.user': lambda u: reverse_lazy('user_details', args=[u.username])}

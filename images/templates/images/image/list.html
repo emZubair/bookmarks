@@ -26,6 +26,7 @@
 
 {% block content %}
     <h1>Images Bookmarked</h1>
+    <h3><a href="{% url 'images:ranking'%}">Check Ranking</a></h3>
     <div id="image-list">
         {% include "images/image/list_ajax.html" %}
     </div>
